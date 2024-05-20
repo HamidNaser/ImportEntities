@@ -1,0 +1,79 @@
+﻿[*.cs]
+
+# CA9999: Analyzer version mismatch
+dotnet_diagnostic.CA9999.severity = warning
+
+# CA1303: Do not pass literals as localized parameters
+dotnet_diagnostic.CA1303.severity = none
+
+# CA1056: Uri properties should not be strings
+dotnet_diagnostic.CA1056.severity = none
+
+# CA1304: Specify CultureInfo
+dotnet_diagnostic.CA1304.severity = none
+
+# CA1307: Specify StringComparison
+dotnet_diagnostic.CA1307.severity = none
+
+# CA1305: Specify IFormatProvider
+dotnet_diagnostic.CA1305.severity = none
+
+
+# CA2227: Collection properties should be read only
+dotnet_diagnostic.CA2227.severity = none
+
+# CA1707: Identifiers should not contain underscores
+dotnet_diagnostic.CA1707.severity = none
+
+# IDE1006: Naming Styles
+dotnet_diagnostic.IDE1006.severity = none
+
+# CA1717: Only FlagsAttribute enums should have plural names
+dotnet_diagnostic.CA1717.severity = silent
+
+#CA10801: Review unused parameters
+dotnet_diagnostic.CA1801.severity = none
+
+#CS0168: The variable 'var' is declared but never used
+dotnet_diagnostic.CS0168.severity = silent
+
+#CA2211: Non-constant fields should not be visible
+dotnet_diagnostic.CA2211.severity = silent
+
+#CA1822: Mark members as static
+dotnet_diagnostic.CA1822.severity = silent
+
+#CA1014: Mark assemblies with CLSCompliantAttribute
+dotnet_diagnostic.CA1014.severity = silent
+
+#CA1054: URI parameters should not be strings
+dotnet_diagnostic.CA1054.severity = silent
+
+#CA1724: Type names should not match namespaces
+dotnet_diagnostic.CA1724.severity = silent
+
+#CA2007: Do not directly await a Task
+dotnet_diagnostic.CA2007.severity = silent
+
+#CA1031: Do not catch general exception types
+dotnet_diagnostic.CA1031.severity = silent
+
+#CA2234: Pass System.Uri objects instead of strings
+dotnet_diagnostic.CA2234.severity = silent
+
+#CS8632: Nullable reference types
+dotnet_diagnostic.CS8632.severity = silent
+
+#CS8618: Attributes for null-state static analysis interpreted by the C# compiler
+dotnet_diagnostic.CS8618.severity = silent
+
+#CA1051: Do not declare visible instance fields
+dotnet_diagnostic.CA1051.severity = silent
+
+dotnet_diagnostic.CA1034.severity = silent
+
+dotnet_diagnostic.CA1998.severity = silent
+
+dotnet_diagnostic.CS8604.severity = silent
+
+dotnet_diagnostic.CS8602.severity = silent
