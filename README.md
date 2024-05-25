@@ -25,10 +25,8 @@ The primary objective of this project is to provide a comprehensive example of s
   - **POST Requests**: Shows how to send data to APIs using POST requests.
   - Example: [API Integration Example](#api-integration-example)
 
-- **[Generate Paragraph Summary]**
-  - [Generate Paragraph Summary](#generate-paragraph-summary)
-  - Integrates Serilog for structured logging, making it easier to diagnose and monitor application behavior.
-  - Example: [Serilog Logging](#serilog-logging-example)
+- **Logging with Serilog**
+  - [Serilog Logging](#serilog-logging) Integrates Serilog for structured logging, making it easier to diagnose and monitor application behavior. 
 
 - **Azure Services Integration**
   - **Application Insights**: Utilizes Azure Application Insights for monitoring and diagnostics.
@@ -156,7 +154,7 @@ public async Task BlobStorageExample()
 }
 ```
 
-### Generate Paragraph Summary
+### Serilog Logging
 
 The following code snippet demonstrates how to initialize common dependencies using Serilog for logging:
 
