@@ -34,6 +34,39 @@ The primary objective of this project is to provide a comprehensive example of s
   - **Blob Storage**: Demonstrates the use of Azure Blob Storage for storing and retrieving binary data.
   - Examples: [Application Insights Example](#application-insights-example), [Blob Storage Example](#blob-storage-example)
 
+
+
+## Dependency Injection
+
+## Dependency Injection Example
+
+Dependency injection is utilized to manage class dependencies, promoting loose coupling and easier testing. The following code snippet demonstrates how to configure dependency injection for various services.
+
+```csharp
+private void InitializeClientDependencies()
+{
+    Initialize((context, services) =>
+    {
+        _serviceEntities =
+            services
+                .AddSingletonServices()
+
+                .AddSingleton<IClientInfo, ClientInfo>()
+
+                .AddSingleton<IClientService, ClientService>()
+                
+                .AddSingleton<IEntitiesService<Movie>, ClientMoviesService<Movie>>()
+
+                .AddSingleton<IApiHelper<MoviesWrapper>, MoviesJsonApiHelper<MoviesWrapper>>()
+
+                .BuildServiceProvider();
+        
+    }, "Movies.txt");
+}
+```
+
+
+
 ## Azure Services
 
 ### Application Insights Example
