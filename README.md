@@ -27,12 +27,14 @@ The primary objective of this project is to provide a comprehensive example of s
 
 - **Logging with Serilog**
   - Integrates Serilog for structured logging, making it easier to diagnose and monitor application behavior.
-  - Example: [Serilog Logging Example](#serilog-logging-example)
+  - Example: [Serilog Logging](#serilog-logging-example)
 
 - **Azure Services Integration**
   - **Application Insights**: Utilizes Azure Application Insights for monitoring and diagnostics.
   - **Blob Storage**: Demonstrates the use of Azure Blob Storage for storing and retrieving binary data.
-  - Examples: [Application Insights Example](#application-insights-example), [Blob Storage Example](#blob-storage-example)
+  - Examples: [Application Insights](#application-insights-example), [Blob Storage](#blob-storage-example)
+
+
 
 ## Azure Services
 
@@ -153,7 +155,7 @@ public async Task BlobStorageExample()
 }
 ```
 
-## Initialization with Serilog
+## Serilog Logging
 
 The following code snippet demonstrates how to initialize common dependencies using Serilog for logging:
 
