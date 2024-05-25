@@ -13,6 +13,7 @@ The primary objective of this project is to provide a comprehensive example of s
   - Example: [SOLID Principle Implementation](#solid-design-principles-example)
 
 - **Dependency Injection**
+  - [Generate Paragraph Summary](#generate-paragraph-summary)
   - Utilizes dependency injection to manage class dependencies, promoting loose coupling and easier testing.
   - Example: [Dependency Injection Example](#dependency-injection-example)
 
@@ -155,7 +156,7 @@ public async Task BlobStorageExample()
 }
 ```
 
-## Serilog Logging
+### Generate Paragraph Summary
 
 The following code snippet demonstrates how to initialize common dependencies using Serilog for logging:
 
