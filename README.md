@@ -36,7 +36,7 @@ The primary objective of this project is to provide a comprehensive example of s
 
 ## Azure Services
 
-### Application Insights
+### Application Insights Example
 
 Application Insights is used for monitoring and diagnosing application performance and reliability. It helps in tracking requests, dependencies, exceptions, and custom events.
 
@@ -85,7 +85,7 @@ public void LogExample()
 }
 ```
 
-### Blob Storage
+### Blob Storage Example
 
 Azure Blob Storage is used to store and retrieve binary data such as files, images, and videos.
 
