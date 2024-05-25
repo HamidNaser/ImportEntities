@@ -1,3 +1,6 @@
+I apologize for the confusion. Let's correct the internal links to ensure they match the section headers properly. Here's the revised version:
+
+```markdown
 # Introduction
 
 Welcome to the GetBU project repository! This project demonstrates the implementation of various software engineering principles and technologies, showcasing modern C# programming practices and the integration of Azure services.
@@ -10,7 +13,7 @@ The primary objective of this project is to provide a comprehensive example of s
 
 - **SOLID Design Principles**
   - Demonstrates the use of SOLID design patterns to ensure scalable and maintainable code.
-  - Example: [SOLID Principle Implementation](#solid-design-principles-example)
+  - Example: [SOLID Principle Implementation](#solid-principle-implementation-example)
 
 - **Dependency Injection**
   - Utilizes dependency injection to manage class dependencies, promoting loose coupling and easier testing.
@@ -18,7 +21,7 @@ The primary objective of this project is to provide a comprehensive example of s
 
 - **Generics in Classes**
   - Implements generics (`<T>`) to create flexible and reusable class definitions.
-  - Example: [Generics Implementation](#generics-example)
+  - Example: [Generics Implementation](#generics-implementation-example)
 
 - **API Integration**
   - **GET Requests**: Demonstrates how to call APIs and handle JSON responses.
@@ -26,14 +29,13 @@ The primary objective of this project is to provide a comprehensive example of s
   - Example: [API Integration Example](#api-integration-example)
 
 - **Logging with Serilog**
-  - [Serilog Logging](#serilog-logging) Integrates Serilog for structured logging, making it easier to diagnose and monitor application behavior. 
+  - Integrates Serilog for structured logging, making it easier to diagnose and monitor application behavior.
+  - Example: [Serilog Logging Example](#serilog-logging-example)
 
 - **Azure Services Integration**
   - **Application Insights**: Utilizes Azure Application Insights for monitoring and diagnostics.
   - **Blob Storage**: Demonstrates the use of Azure Blob Storage for storing and retrieving binary data.
-  - Examples: [Application Insights](#application-insights-example), [Blob Storage](#blob-storage-example)
-
-
+  - Examples: [Application Insights Example](#application-insights-example), [Blob Storage Example](#blob-storage-example)
 
 ## Azure Services
 
@@ -154,7 +156,7 @@ public async Task BlobStorageExample()
 }
 ```
 
-### Serilog Logging
+### Serilog Logging Example
 
 The following code snippet demonstrates how to initialize common dependencies using Serilog for logging:
 
@@ -217,3 +219,6 @@ public void InitializeDependenciesExample()
 ## Contact
 
 For any questions or further information, please contact Hamid Awad at hamid.naser1106@gmail.com.
+```
+
+Now, clicking on any example link in the "Key Features" section should navigate to the appropriate section of the document.
