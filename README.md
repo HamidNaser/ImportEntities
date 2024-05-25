@@ -1,3 +1,4 @@
+
 # Introduction
 
 Welcome to the GetBU project repository! This project demonstrates the implementation of various software engineering principles and technologies, showcasing modern C# programming practices and the integration of Azure services.
@@ -74,6 +75,7 @@ Application Insights is used for monitoring and diagnosing application performan
             .ForContext("ClientName", _clientInfo.ClientName);
     }
     ```
+
 #### Example
 
 ```csharp
@@ -83,7 +85,7 @@ public void LogExample()
     Log.Information("This is a test log message for Application Insights.");
 }
 ```
-#blob-storage-example
+
 ### Blob Storage
 
 Azure Blob Storage is used to store and retrieve binary data such as files, images, and videos.
