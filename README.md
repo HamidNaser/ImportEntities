@@ -1,6 +1,3 @@
-I apologize for the confusion. Let's correct the internal links to ensure they match the section headers properly. Here's the revised version:
-
-```markdown
 # Introduction
 
 Welcome to the GetBU project repository! This project demonstrates the implementation of various software engineering principles and technologies, showcasing modern C# programming practices and the integration of Azure services.
@@ -221,4 +218,3 @@ public void InitializeDependenciesExample()
 For any questions or further information, please contact Hamid Awad at hamid.naser1106@gmail.com.
 ```
 
-Now, clicking on any example link in the "Key Features" section should navigate to the appropriate section of the document.
