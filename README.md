@@ -1,4 +1,3 @@
-
 # Introduction
 
 Welcome to the GetBU project repository! This project demonstrates the implementation of various software engineering principles and technologies, showcasing modern C# programming practices and the integration of Azure services.
@@ -28,7 +27,7 @@ The primary objective of this project is to provide a comprehensive example of s
 
 - **Logging with Serilog**
   - Integrates Serilog for structured logging, making it easier to diagnose and monitor application behavior.
-  - Example: [Serilog Logging Example](#logging-with-serilog-example)
+  - Example: [Serilog Logging Example](#serilog-logging-example)
 
 - **Azure Services Integration**
   - **Application Insights**: Utilizes Azure Application Insights for monitoring and diagnostics.
