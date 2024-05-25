@@ -13,7 +13,6 @@ The primary objective of this project is to provide a comprehensive example of s
   - Example: [SOLID Principle Implementation](#solid-design-principles-example)
 
 - **Dependency Injection**
-  - [Generate Paragraph Summary](#generate-paragraph-summary)
   - Utilizes dependency injection to manage class dependencies, promoting loose coupling and easier testing.
   - Example: [Dependency Injection Example](#dependency-injection-example)
 
@@ -26,7 +25,8 @@ The primary objective of this project is to provide a comprehensive example of s
   - **POST Requests**: Shows how to send data to APIs using POST requests.
   - Example: [API Integration Example](#api-integration-example)
 
-- **Logging with Serilog**
+- **[Generate Paragraph Summary]**
+  - [Generate Paragraph Summary](#generate-paragraph-summary)
   - Integrates Serilog for structured logging, making it easier to diagnose and monitor application behavior.
   - Example: [Serilog Logging](#serilog-logging-example)
 
