@@ -65,6 +65,73 @@ private void InitializeClientDependencies()
 }
 ```
 
+### Generics Implementation
+
+Generics (`<T>`) are used to create flexible and reusable class definitions. The following example demonstrates the implementation of generics in a service class.
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Serilog;
+
+public abstract class ApiHelper<T> : ApiHelperUtil<T>, IApiHelper<T> where T : new()
+{
+    protected IClientInfo _clientInfo;
+
+    protected ApiHelper(IClientInfo clientInfo)
+    {
+        _clientInfo = clientInfo;
+    }
+
+    public async Task<Dictionary<string, T>> GetClientDataCollection(List<string> endpoints)
+    {
+        var clientDataDic = new Dictionary<string, T>();
+
+        return await Task.FromResult(((Func<Dictionary<string, T>>) (() =>
+        {
+            try
+            {
+                endpoints.ForEach(endPoint =>
+                {
+                    clientDataDic.Add(endPoint, GetClientData(endPoint).GetAwaiter().GetResult());
+                });
+            }
+            catch (Exception exception)
+            { 
+                Log.Logger.Error("{@LogMessage}", exception.GetaAllMessages());
+            }
+
+            return clientDataDic;
+        }))());
+    }
+
+    public async Task<T> GetClientData(string endpoint)
+    {
+        return await Task.FromResult(((Func<T>) (() =>
+        {
+            try
+            {
+                var rawData = GetRawData(endpoint);
+                if (rawData.HasAny())
+                {
+                    return GetData(rawData);
+                }
+            }
+            catch (Exception exception)
+            {
+                Log.Logger.Error("{@LogMessage}", exception.GetaAllMessages());                
+            }
+
+            return default;
+        }))());
+    }
+
+    protected abstract List<string> GetRawData(string endPoint);
+
+    protected abstract T GetData(List<string> rawData);
+}
+```
 
 
 ## Azure Services
@@ -249,5 +316,4 @@ public void InitializeDependenciesExample()
 ## Contact
 
 For any questions or further information, please contact Hamid Awad at hamid.naser1106@gmail.com.
-```
 
