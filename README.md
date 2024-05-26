@@ -23,7 +23,6 @@ The primary objective of this project is to provide a comprehensive example of s
 - **API Integration**
   - **GET Requests**: Demonstrates how to call APIs and handle JSON responses.
   - **POST Requests**: Shows how to send data to APIs using POST requests.
-  - Example: [API Integration Example](#api-integration-example)
   - Examples: [GET Request Example](#get-request-example), [POST Request Example](#post-request-example)  
 
 - **Logging with Serilog**
@@ -162,29 +161,31 @@ protected override List<string> GetRawData(string endPoint)
 ## POST Request Example
 
 ```csharp
-protected override List<string> GetRawData(string endPoint)
+public virtual async Task<string> UpdateEntities(string entities)
 {
-    var rawDataList = new List<string>();
-    
-    try
-    {
-        var apiKey = "fb65378988bd7263c04991e50189844f";
-        var url = endPoint + $"?api_key={apiKey}&language=en-US&page=1";
+    var httpClient = new HttpClient();
 
-        using (WebClient wc = new HttpClientUtils.WebClientWithTimeout())
-        {
-            wc.Proxy = null;
-            var result = wc.DownloadString(url);  // GET request
-            rawDataList.Add(result);
-        }
-    }
-    catch (Exception e)
+    var requestString = $"/posts";
+
+    var connectUri = "https://jsonplaceholder.typicode.com";
+
+    var requestUri = new Uri(new Uri(connectUri), requestString);
+
+    var content = new StringContent(entities, Encoding.UTF8, "application/json");
+
+    var response = await httpClient.PostAsync(requestUri, content);
+
+    if (!response.IsSuccessStatusCode)
     {
-        Log.Logger.Error("{@LogMessage}", e.GetaAllMessages());
-        return rawDataList;
+        var errorBuilder = new StringBuilder();
+        errorBuilder.AppendLine("Connect entities batch update failed.");
+        errorBuilder.AppendLine("Status Code " + response.StatusCode);
+        var responseContent = await response.Content.ReadAsStringAsync();
+        errorBuilder.AppendLine(responseContent);
+
     }
 
-    return rawDataList;
+    return await response.Content.ReadAsStringAsync();
 }
 ```
 
