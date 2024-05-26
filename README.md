@@ -1,6 +1,6 @@
 # Introduction
 
-Welcome to the GetBU project repository! This project demonstrates the implementation of various software engineering principles and technologies, showcasing modern C# programming practices and the integration of Azure services.
+This project demonstrates the implementation of various software engineering principles and technologies, showcasing modern C# programming practices and the integration of Azure services.
 
 ## Purpose
 
@@ -10,7 +10,6 @@ The primary objective of this project is to provide a comprehensive example of s
 
 - **SOLID Design Principles**
   - Demonstrates the use of SOLID design patterns to ensure scalable and maintainable code.
-  - Example: [SOLID Principle Implementation](#solid-principle-implementation-example)
 
 - **Dependency Injection**
   - Utilizes dependency injection to manage class dependencies, promoting loose coupling and easier testing.
@@ -25,6 +24,7 @@ The primary objective of this project is to provide a comprehensive example of s
   - **GET Requests**: Demonstrates how to call APIs and handle JSON responses.
   - **POST Requests**: Shows how to send data to APIs using POST requests.
   - Example: [API Integration Example](#api-integration-example)
+  - Examples: [GET Request Example](#get-request-example), [POST Request Example](#post-request-example)  
 
 - **Logging with Serilog**
   - Integrates Serilog for structured logging, making it easier to diagnose and monitor application behavior.
@@ -130,8 +130,63 @@ public abstract class ApiHelper<T> : ApiHelperUtil<T>, IApiHelper<T> where T : n
 }
 ```
 
+## GET Request Example
 
-## Azure Services
+```csharp
+protected override List<string> GetRawData(string endPoint)
+{
+    var rawDataList = new List<string>();
+    
+    try
+    {
+        var apiKey = "fb65378988bd7263c04991e50189844f";
+        var url = endPoint + $"?api_key={apiKey}&language=en-US&page=1";
+
+        using (WebClient wc = new HttpClientUtils.WebClientWithTimeout())
+        {
+            wc.Proxy = null;
+            var result = wc.DownloadString(url);  // GET request
+            rawDataList.Add(result);
+        }
+    }
+    catch (Exception e)
+    {
+        Log.Logger.Error("{@LogMessage}", e.GetaAllMessages());
+        return rawDataList;
+    }
+
+    return rawDataList;
+}
+```
+
+## POST Request Example
+
+```csharp
+protected override List<string> GetRawData(string endPoint)
+{
+    var rawDataList = new List<string>();
+    
+    try
+    {
+        var apiKey = "fb65378988bd7263c04991e50189844f";
+        var url = endPoint + $"?api_key={apiKey}&language=en-US&page=1";
+
+        using (WebClient wc = new HttpClientUtils.WebClientWithTimeout())
+        {
+            wc.Proxy = null;
+            var result = wc.DownloadString(url);  // GET request
+            rawDataList.Add(result);
+        }
+    }
+    catch (Exception e)
+    {
+        Log.Logger.Error("{@LogMessage}", e.GetaAllMessages());
+        return rawDataList;
+    }
+
+    return rawDataList;
+}
+```
 
 ### Application Insights Example
 
