@@ -18,8 +18,8 @@ The primary objective of this project is to provide a comprehensive example of s
 
 - **Generics in Classes**
   - Implements generics (`<T>`) to create flexible and reusable class definitions.
-  - Example: [Generics Implementation](#serilog-logging-examplea)  
-  - Example: [Generics Implementation](#generics-implementation-example)
+  - Example: [Serilog Logging ExampleA](#serilog-logging-examplea)  
+
 
 - **API Integration**
   - **GET Requests**: Demonstrates how to call APIs and handle JSON responses.
@@ -66,8 +66,7 @@ private void InitializeClientDependencies()
 }
 ```
 
-### Generics Implementation
-### Generics Implementationq
+### Serilog Logging ExampleA
 
 Generics (`<T>`) are used to create flexible and reusable class definitions. The following example demonstrates the implementation of generics in a service class.
 
