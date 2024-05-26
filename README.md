@@ -18,6 +18,7 @@ The primary objective of this project is to provide a comprehensive example of s
 
 - **Generics in Classes**
   - Implements generics (`<T>`) to create flexible and reusable class definitions.
+  - Example: [Serilog Logging ExampleA](#serilog-logging-examplea)  
   - Example: [Generics Implementation](#generics-implementation-example)
 
 - **API Integration**
@@ -65,15 +66,12 @@ private void InitializeClientDependencies()
 }
 ```
 
+### Serilog Logging ExampleA
 ### Generics Implementation
 
 Generics (`<T>`) are used to create flexible and reusable class definitions. The following example demonstrates the implementation of generics in a service class.
 
 ```csharp
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Serilog;
 
 public abstract class ApiHelper<T> : ApiHelperUtil<T>, IApiHelper<T> where T : new()
 {
