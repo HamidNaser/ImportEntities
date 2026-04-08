@@ -6,8 +6,6 @@ using Importer.Core.Common;
 using Importers.ImportClient;
 using Importers.Integration.Interfaces;
 using Importers.Models.ApiModels;
-using Microsoft.Azure.KeyVault.Core;
-using Microsoft.Extensions.Logging;
 using Serilog;
 
 
@@ -15,11 +13,15 @@ namespace ImporterMoviesClient
 {
     public class MovieImporterClient<T1, T2> : EntitiesImporter<T1, T2>
     {
+        private readonly MovieApiOptions _movieApiOptions;
+
         public MovieImporterClient(
             IClientInfo clientInfo,
+            MovieApiOptions movieApiOptions,
             IApiHelper<T1> apiHelperMovie, 
             IEntitiesService<T2> entitiesService) : base(clientInfo, entitiesService)
         {
+            _movieApiOptions = movieApiOptions;
             _apiHelpeEntities = apiHelperMovie;
         }
         private async Task AfterRead(List<T2> apiMovies, string apiUrl)
@@ -62,7 +64,7 @@ namespace ImporterMoviesClient
         {
             base.SetApiFeedUrls();
             
-            AddEntitiesUrl("https://api.themoviedb.org/3/movie/popular", AfterRead);
+            AddEntitiesUrl(_movieApiOptions.Endpoint, AfterRead);
         }
     }    
 }

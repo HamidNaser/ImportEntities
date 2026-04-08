@@ -10,9 +10,12 @@ namespace Importers.Integration.ApiHelper
 {
     public class MoviesJsonApiHelper<T> : ApiHelper<T> where T : new()
     {
-        public MoviesJsonApiHelper(IClientInfo clientInfo) : base(clientInfo)
+        private readonly MovieApiOptions _movieApiOptions;
+
+        public MoviesJsonApiHelper(IClientInfo clientInfo, MovieApiOptions movieApiOptions) : base(clientInfo)
         {
-            _clientInfo = clientInfo;           
+            _clientInfo = clientInfo;
+            _movieApiOptions = movieApiOptions;
         }
 
         protected override List<string> GetRawData(string endPoint)
@@ -21,9 +24,12 @@ namespace Importers.Integration.ApiHelper
             
             try
             {
-                var apiKey = "fb65378988bd7263c04991e50189844f";
+                if (string.IsNullOrWhiteSpace(_movieApiOptions.ApiKey))
+                {
+                    throw new InvalidOperationException("Movies API key is missing. Configure ApiClients:Movies:ApiKey or TMDB_API_KEY before running the importer.");
+                }
 
-                var url = endPoint + $"?api_key={apiKey}&language=en-US&page=1";
+                var url = endPoint + $"?api_key={_movieApiOptions.ApiKey}&language={_movieApiOptions.Language}&page={_movieApiOptions.Page}";
 
                 using (WebClient wc = new HttpClientUtils.WebClientWithTimeout())
                 {

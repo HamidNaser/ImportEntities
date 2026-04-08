@@ -7,6 +7,7 @@ using Importers.ImportClient;
 using Importers.Integration.ApiHelper;
 using Importers.Integration.Interfaces;
 using Importers.Models.ApiModels;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -44,9 +45,16 @@ namespace ImporterMoviesClient
         {
             Initialize((context, services) =>
             {
+                var movieApiOptions = _configuration.GetSection("ApiClients:Movies").Get<MovieApiOptions>() ?? new MovieApiOptions();
+                movieApiOptions.ApiKey = Environment.GetEnvironmentVariable("TMDB_API_KEY") ?? movieApiOptions.ApiKey;
+
+                var repositoryOptions = _configuration.GetSection("Repository").Get<RepositoryOptions>() ?? new RepositoryOptions();
+
                 _serviceEntities =
                     services
                         .AddSingletonServices()
+                        .AddSingleton(movieApiOptions)
+                        .AddSingleton(repositoryOptions)
 
                         .AddSingleton<IClientInfo, ClientInfo>()
 

@@ -59,7 +59,6 @@ namespace Importers.ImportClient
 
         protected virtual void InitializeLog(IConfigurationBuilder configurationBuilder, string logFileName)
         {
-            var filepath = _configuration.GetSection("AppConfig").GetSection("FilePath").Value + logFileName;
             var jsonFormatter = new Serilog.Formatting.Json.JsonFormatter(renderMessage: true);
             var InstrumentationKey = Environment.GetEnvironmentVariable("INSTRUMENTATION_KEY") ?? string.Empty;
 

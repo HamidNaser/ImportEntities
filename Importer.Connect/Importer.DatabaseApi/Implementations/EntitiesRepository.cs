@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Importer.Core.Common;
 using Importer.DatabaseApi.Interfaces;
-using RestSharp;
 
 
 
@@ -18,25 +17,21 @@ namespace Importer.DatabaseApi.Implementations
     {
 
         protected readonly IClientInfo _clientInfo;
+        private readonly RepositoryOptions _repositoryOptions;
         
-        public EntitiesRepository(IClientInfo clientInfo)
+        public EntitiesRepository(IClientInfo clientInfo, RepositoryOptions repositoryOptions)
         {
             _clientInfo = clientInfo;
+            _repositoryOptions = repositoryOptions;
         }
 
         public virtual async Task<string> UpdateEntities(string entities)
         {
-            var httpClient = new HttpClient();
-
-            var requestString = $"/posts";
-
-            var connectUri = "https://jsonplaceholder.typicode.com";
-
-            var requestUri = new Uri(new Uri(connectUri), requestString);
+            var requestUri = new Uri(new Uri(_repositoryOptions.BaseUrl), _repositoryOptions.UpdateEntitiesPath);
 
             var content = new StringContent(entities, Encoding.UTF8, "application/json");
 
-            var response = await httpClient.PostAsync(requestUri, content);
+            var response = await _clientInfo.ClientHttp.PostAsync(requestUri, content);
 
             if (!response.IsSuccessStatusCode)
             {
