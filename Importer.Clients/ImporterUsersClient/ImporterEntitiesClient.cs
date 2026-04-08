@@ -6,8 +6,7 @@ using Importer.Core.Common;
 using Importers.ImportClient;
 using Importers.Integration.Interfaces;
 using Importers.Models.ApiModels;
-using Microsoft.Azure.KeyVault.Core;
-using Microsoft.Extensions.Logging;
+using Importers.Models.ApiModels.Users;
 using Serilog;
 
 
@@ -15,11 +14,15 @@ namespace ImporterUsersClient
 {
     public class UserImporterClient<T1, T2> : EntitiesImporter<T1, T2>
     {
+        private readonly UserApiOptions _userApiOptions;
+
         public UserImporterClient(
             IClientInfo clientInfo,
+            UserApiOptions userApiOptions,
             IApiHelper<T1> apiHelperUser, 
             IEntitiesService<T2> entitiesService) : base(clientInfo, entitiesService)
         {
+            _userApiOptions = userApiOptions;
             _apiHelpeEntities = apiHelperUser;
         }
         private async Task AfterRead(List<T2> apiUsers, string apiUrl)
@@ -30,7 +33,7 @@ namespace ImporterUsersClient
                 {
                     apiUsers.ForEach(apiUser =>
                     {
-                        if (apiUser is not Movie clientUser)
+                        if (apiUser is not User clientUser)
                         {
                             return;
                         }
@@ -62,7 +65,7 @@ namespace ImporterUsersClient
         {
             base.SetApiFeedUrls();
             
-            AddEntitiesUrl("https://reqres.in/api/users", AfterRead);
+            AddEntitiesUrl(_userApiOptions.Endpoint, AfterRead);
         }
     }    
 }

@@ -7,6 +7,7 @@ using Importers.ImportClient;
 using Importers.Integration.ApiHelper;
 using Importers.Integration.Interfaces;
 using Importers.Models.ApiModels.Users;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -44,9 +45,14 @@ namespace ImporterUsersClient
         {
             Initialize((context, services) =>
             {
+                var userApiOptions = _configuration.GetSection("ApiClients:Users").Get<UserApiOptions>() ?? new UserApiOptions();
+                var repositoryOptions = _configuration.GetSection("Repository").Get<RepositoryOptions>() ?? new RepositoryOptions();
+
                 _serviceEntities =
                     services
                         .AddSingletonServices()
+                        .AddSingleton(userApiOptions)
+                        .AddSingleton(repositoryOptions)
 
                         .AddSingleton<IClientInfo, ClientInfo>()
 
