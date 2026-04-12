@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Importer.Business.Interfaces;
 using Importer.Core.Common;
@@ -14,6 +15,7 @@ namespace ImporterMoviesClient
     public class MovieImporterClient<T1, T2> : EntitiesImporter<T1, T2>
     {
         private readonly MovieApiOptions _movieApiOptions;
+        private readonly IApiHelper<T1> _apiHelperMovie;
 
         public MovieImporterClient(
             IClientInfo clientInfo,
@@ -22,7 +24,7 @@ namespace ImporterMoviesClient
             IEntitiesService<T2> entitiesService) : base(clientInfo, entitiesService)
         {
             _movieApiOptions = movieApiOptions;
-            _apiHelpeEntities = apiHelperMovie;
+            _apiHelperMovie = apiHelperMovie;
         }
         private async Task AfterRead(List<T2> apiMovies, string apiUrl)
         {
@@ -47,24 +49,27 @@ namespace ImporterMoviesClient
             });
         }
         
-        public override async Task Import()
+        public override async Task Import(CancellationToken ct = default)
         {
             try
             {
-                SetApiFeedUrls();
+                ConfigureSources();
                 
-                await base.Import().ConfigureAwait(false);
+                await base.Import(ct).ConfigureAwait(false);
             }
             catch (Exception e)
             {
                 Log.Logger.Error(e, e.ToString());
             }
         }
-        public override void SetApiFeedUrls()
+        public override void ConfigureSources()
         {
-            base.SetApiFeedUrls();
-            
-            AddEntitiesUrl(_movieApiOptions.Endpoint, AfterRead);
+            base.ConfigureSources();
+
+            AddSource(new ApiHelperEntitiesSource<T1, T2>(
+                _movieApiOptions.Endpoint,
+                _apiHelperMovie,
+                afterReadBatch: AfterRead));
         }
     }    
 }

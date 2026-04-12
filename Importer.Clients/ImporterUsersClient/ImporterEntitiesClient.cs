@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Importer.Business.Interfaces;
 using Importer.Core.Common;
@@ -15,6 +16,7 @@ namespace ImporterUsersClient
     public class UserImporterClient<T1, T2> : EntitiesImporter<T1, T2>
     {
         private readonly UserApiOptions _userApiOptions;
+        private readonly IApiHelper<T1> _apiHelperUser;
 
         public UserImporterClient(
             IClientInfo clientInfo,
@@ -23,7 +25,7 @@ namespace ImporterUsersClient
             IEntitiesService<T2> entitiesService) : base(clientInfo, entitiesService)
         {
             _userApiOptions = userApiOptions;
-            _apiHelpeEntities = apiHelperUser;
+            _apiHelperUser = apiHelperUser;
         }
         private async Task AfterRead(List<T2> apiUsers, string apiUrl)
         {
@@ -48,24 +50,27 @@ namespace ImporterUsersClient
             });
         }
         
-        public override async Task Import()
+        public override async Task Import(CancellationToken ct = default)
         {
             try
             {
-                SetApiFeedUrls();
+                ConfigureSources();
                 
-                await base.Import().ConfigureAwait(false);
+                await base.Import(ct).ConfigureAwait(false);
             }
             catch (Exception e)
             {
                 Log.Logger.Error(e, e.ToString());
             }
         }
-        public override void SetApiFeedUrls()
+        public override void ConfigureSources()
         {
-            base.SetApiFeedUrls();
-            
-            AddEntitiesUrl(_userApiOptions.Endpoint, AfterRead);
+            base.ConfigureSources();
+
+            AddSource(new ApiHelperEntitiesSource<T1, T2>(
+                _userApiOptions.Endpoint,
+                _apiHelperUser,
+                afterReadBatch: AfterRead));
         }
     }    
 }

@@ -1,5 +1,7 @@
 ﻿#define TroubleShooting
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Importer.Business.Interfaces;
 using Importer.Business.Users;
 using Importer.Core.Common;
@@ -26,7 +28,7 @@ namespace ImporterUsersClient
     
     public class ImporterClient : ImporterClientBase
     {
-        public void Import()
+        public async Task ImportAsync(CancellationToken ct = default)
         {
             InitializeClientDependencies();
 
@@ -37,7 +39,7 @@ namespace ImporterUsersClient
 
             var MovieImporterClient = ActivatorUtilities.CreateInstance<UserImporterClient<UsersWrapper, User>>(_host.Services);
 
-            MovieImporterClient.Import().Wait();
+            await MovieImporterClient.Import(ct).ConfigureAwait(false);
 
         }
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 
@@ -7,24 +6,6 @@ namespace Importer.Core.Common
 {
     public static class HttpClientUtils
     {
-#pragma warning disable SYSLIB0014
-        public class WebClientWithTimeout : System.Net.WebClient
-#pragma warning restore SYSLIB0014
-        {
-            protected override WebRequest GetWebRequest(Uri address)
-            {
-                WebRequest wr = base.GetWebRequest(address);
-
-                var webRequestTimeOut = Environment.GetEnvironmentVariable("WebRequestTimeOut");
-                if (string.IsNullOrEmpty(webRequestTimeOut))
-                {
-                    wr.Timeout = string.IsNullOrEmpty(webRequestTimeOut) ? 120000000: Convert.ToInt32(webRequestTimeOut);
-                }
-
-                return wr; 
-            }
-        }
-        
         public static HttpClient GetHttpClientWithTimeout(string baseUri = "")
         {
             var client = new HttpClient();
