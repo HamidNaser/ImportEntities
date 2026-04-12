@@ -4,11 +4,7 @@
 
 It is designed as a clean, layered architecture with strong separation of concerns, generic business orchestration, and production-oriented observability.
 
----
-
-## Why This Project Exists
-
-Most import systems become tightly coupled to one source or one entity type. This project demonstrates a different approach:
+`ImportEntities` project demonstrates a different approach:
 
 - **Source-agnostic ingestion** through `IEntitiesSource<T>` adapters
 - **Reusable orchestration** through `EntitiesImporter<TSource, TEntity>`
@@ -394,11 +390,3 @@ private IHost InitCommonDependencies(Action<HostBuilderContext, IServiceCollecti
     return host;
 }
 ```
-
----
-
-## Contact
-
-Questions, suggestions, or collaboration:
-
-- Hamid Awad : hamid.naser1106@gmail.com
