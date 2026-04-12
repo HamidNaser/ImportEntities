@@ -56,28 +56,30 @@ namespace Importer.Core.Common
         
         public async Task<BlobDetailsMap> ReadBlobFromStorage(string fileName)
         {
-            return await Task.Run(() =>
+            try
             {
-                try
-                {
-                    var serializedBlob = ReadBlobFromAzureBlobStorage($"prod-{fileName}");
-                    
-                    if (string.IsNullOrEmpty(serializedBlob))
-                    {
-                        serializedBlob = ReadBlobFromAzureBlobStorage($"staging-{fileName}");                        
-                    }
-                
-                    var blobDetails = DeserializeJson<BlobDetailsMap>(serializedBlob);
+                var serializedBlob = await ReadBlobFromAzureBlobStorage($"prod-{fileName}").ConfigureAwait(false);
 
-                    return blobDetails;
-                }
-                catch (Exception e)
+                if (string.IsNullOrEmpty(serializedBlob))
                 {
-                    Log.Logger.Error(e, e.ToString());
+                    serializedBlob = await ReadBlobFromAzureBlobStorage($"staging-{fileName}").ConfigureAwait(false);
                 }
 
-                return new BlobDetailsMap();
-            });
+                if (string.IsNullOrEmpty(serializedBlob))
+                {
+                    return new BlobDetailsMap();
+                }
+
+                var blobDetails = DeserializeJson<BlobDetailsMap>(serializedBlob);
+
+                return blobDetails ?? new BlobDetailsMap();
+            }
+            catch (Exception e)
+            {
+                Log.Logger.Error(e, e.ToString());
+            }
+
+            return new BlobDetailsMap();
         }
 
 
@@ -114,19 +116,19 @@ namespace Importer.Core.Common
             }
         }
 
-        public string ReadBlobFromAzureBlobStorage(string fileName)
+        public async Task<string> ReadBlobFromAzureBlobStorage(string fileName)
         {
             try
             {
                 var blobStorageConnectionString =
                     Environment.GetEnvironmentVariable("BLOB_STORAGE_CONNECTION_STRING");
-                
+
                 CloudStorageAccount storageAccount = CloudStorageAccount.Parse(blobStorageConnectionString);
                 CloudBlobClient serviceClient = storageAccount.CreateCloudBlobClient();
                 CloudBlobContainer container = serviceClient.GetContainerReference("importer-archive");
                 CloudBlockBlob blob = container.GetBlockBlobReference($"{fileName}");
 
-                var blobContent = blob.DownloadTextAsync().Result;
+                var blobContent = await blob.DownloadTextAsync().ConfigureAwait(false);
 
                 return blobContent;
             }

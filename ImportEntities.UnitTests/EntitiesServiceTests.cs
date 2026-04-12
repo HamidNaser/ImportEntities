@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Importer.Business.Implementations;
 using Importer.Core.Common;
@@ -63,7 +64,7 @@ namespace ImportEntities.Tests
         {
             public List<int> BatchSizes { get; } = new List<int>();
 
-            public Task<string> UpdateEntities(string entities)
+            public Task<string> UpdateEntities(string entities, CancellationToken ct = default)
             {
                 var document = JsonDocument.Parse(entities);
                 BatchSizes.Add(document.RootElement.GetArrayLength());

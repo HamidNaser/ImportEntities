@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Importer.Business.Interfaces;
 using Importer.Core.Common;
-using Importers.Integration.Interfaces;
 using Serilog;
 
 using BlobInformation = Importer.Core.Common.BlobInformation;
@@ -15,12 +15,9 @@ namespace Importers.ImportClient
 {
     public class EntitiesImporter<T1, T2> : IEntitiesImporter<T1, T2>
     {
-        protected IApiHelper<T1> _apiHelpeEntities;
-        private List<T2> _Entities;
+        private List<T2> _entities;
         protected readonly IEntitiesService<T2> _EntitiesService;
-        protected List<string> _EntitiesApiUrls;        
-        protected Dictionary<string, Func<T2, Task>> _EntitiesApiUrlsRecordAction;        
-        protected Dictionary<string, Func<List<T2>, string, Task>> _EntitiesApiUrlsRecordsAction;
+        protected readonly List<IEntitiesSource<T2>> _entitySources = new List<IEntitiesSource<T2>>();
         protected IClientInfo _clientInfo;
         
         public EntitiesImporter(
@@ -37,79 +34,43 @@ namespace Importers.ImportClient
         public string ClientId { get; set; }
         public HttpClient ClientHttp { get; set; }
 
-        protected void AddEntitiesUrl(string url)
+        protected void AddSource(IEntitiesSource<T2> source)
         {
-            if (_EntitiesApiUrls == null)
+            if (source == null)
             {
-                _EntitiesApiUrls = new List<string>();
+                return;
             }
 
-            if (!string.IsNullOrEmpty(url))
-            {
-                _EntitiesApiUrls.Add(url);
-            }
-        }
-        protected void AddEntitiesUrl(string url, Func<T2, Task> updateApiEntitiesAfterRead = null)
-        {
-            if (_EntitiesApiUrlsRecordAction == null)
-            {
-                _EntitiesApiUrlsRecordAction = new Dictionary<string, Func<T2, Task>>();
-            }
-
-            if (!string.IsNullOrEmpty(url))
-            {
-                _EntitiesApiUrlsRecordAction.Add(url, updateApiEntitiesAfterRead);
-            }
-        }
-        protected void AddEntitiesUrl(string url, Func<List<T2>, string, Task> updateApiEntitiesAfterRead = null)
-        {
-            if (_EntitiesApiUrlsRecordsAction == null)
-            {
-                _EntitiesApiUrlsRecordsAction = new Dictionary<string, Func<List<T2>, string, Task>>();
-            }
-            if (!string.IsNullOrEmpty(url))
-            {
-                _EntitiesApiUrlsRecordsAction.Add(url, updateApiEntitiesAfterRead);
-            }
+            _entitySources.Add(source);
         }
 
-        public virtual async Task Import()
+        public virtual async Task Import(CancellationToken ct = default)
         {
             try
             {
                 Log.Logger.Information("{@LogMessage}", "Entities Import Started");
 
-                if (!_Entities.HasAny())
+                if (!_entities.HasAny())
                 {
-                    _Entities = await GetEntitiesFromClientApi().ConfigureAwait(false);
+                    _entities = await GetEntitiesFromSources(ct).ConfigureAwait(false);
                 }
                 
-                Log.Logger.Information("{@LogMessage}", $"Entities Count {_Entities.Count}");                
+                Log.Logger.Information("{@LogMessage}", $"Entities Count {_entities.Count}");                
 
-                if (_Entities != null && _Entities.Count > 0)
+                if (_entities != null && _entities.Count > 0)
                 {
                     _EntitiesService.ClientId = ClientId;
                     _EntitiesService.ClientHttp = ClientHttp;
 
-                    var importEntitiesMethod = typeof(IEntitiesService<T2>).GetMethod("ImportEntities");
-                    if (importEntitiesMethod != null)
-                    {
-                        var importEntitiesParams = new List<object>
-                        {
-                            _Entities,
-                        };
-                        var importEntitiesMethodResult =
-                            (Task) importEntitiesMethod.Invoke(_EntitiesService,
-                                importEntitiesParams.ToArray());
-
-                        if (importEntitiesMethodResult != null)
-                        {
-                            await importEntitiesMethodResult.ConfigureAwait(false);
-                        }
-                    }
+                    await _EntitiesService.ImportEntities(_entities, ct).ConfigureAwait(false);
                 }
 
                 Log.Logger.Information("{@LogMessage}", "Entities Import Ended");
+            }
+            catch (OperationCanceledException)
+            {
+                Log.Logger.Warning("{@LogMessage}", "Entities Import cancelled.");
+                throw;
             }
             catch (Exception e)
             {
@@ -117,149 +78,49 @@ namespace Importers.ImportClient
             }
         }
 
-        public virtual void SetApiFeedUrls()
+        public virtual void ConfigureSources()
         {
-            if (_EntitiesApiUrls.HasAny())
+            if (_entitySources.HasAny())
             {
-                _EntitiesApiUrls.Clear();
-            }
-
-            if (_EntitiesApiUrlsRecordAction.HasAny())
-            {
-                _EntitiesApiUrlsRecordAction.Clear();
-            }
-
-            if (_EntitiesApiUrlsRecordsAction.HasAny())
-            {
-                _EntitiesApiUrlsRecordsAction.Clear();
+                _entitySources.Clear();
             }
         }
 
-        protected virtual async Task<List<T2>> GetEntitiesFromClientApi()
+        protected virtual async Task<List<T2>> GetEntitiesFromSources(CancellationToken ct = default)
         {
             var allEntities = new List<T2>();
             try
             {
-                Log.Logger.Information("{@LogMessage}", "GetEntitiesFromClientApi Started");
+                Log.Logger.Information("{@LogMessage}", "GetEntitiesFromSources Started");
 
                 var blobInfosDictionary = new Dictionary<string, List<BlobInformation>>();                
                 
-                var tasks = new List<Task>();
-
                 var importClientHelper = new ImportClientHelper();
 
-                if (_EntitiesApiUrlsRecordAction != null && _EntitiesApiUrlsRecordAction.Count > 0)
+                foreach (var source in _entitySources)
                 {
-                    foreach (var keyValue in _EntitiesApiUrlsRecordAction)
+                    ct.ThrowIfCancellationRequested();
+
+                    if (source == null)
                     {
-                        if (!string.IsNullOrEmpty(keyValue.Key))
-                        {
-                            Log.Logger.Information("{@LogMessage}", $"GetClientData({keyValue.Key}) - Started");
-
-                            var entitiesWrapper = await _apiHelpeEntities.GetClientData(keyValue.Key).ConfigureAwait(false);
-
-                            var blobCollection = GetEntitiesBlob(entitiesWrapper);
-                            if (blobCollection.HasAny())
-                            {
-                                blobInfosDictionary.Add(keyValue.Key, blobCollection);                                
-                            }
-
-                            Log.Logger.Information("{@LogMessage}", $"GetClientData({keyValue.Key}) - Ended");
-
-                            var entities = (List<T2>) importClientHelper.GetPropertyValue(entitiesWrapper, "Entities");
-
-                            if (entitiesWrapper != null && entities != null && entities.Any())
-                            {
-                                if (entities.HasAny() && keyValue.Value != null)
-                                {
-                                    try
-                                    {
-                                        tasks.AddRange(entities.Select(y => keyValue.Value(y)));
-                                        await Task.WhenAll(tasks); 
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Log.Logger.Error(e, e.ToString());
-                                    }
-                                }
-
-                                allEntities.AddRange(entities);
-                            }
-                        }
+                        continue;
                     }
-                }
 
-                if (_EntitiesApiUrlsRecordsAction != null && _EntitiesApiUrlsRecordsAction.Count > 0)
-                {
-                    foreach (var keyValue in _EntitiesApiUrlsRecordsAction)
+                    var sourceResult = await source.Read(ct).ConfigureAwait(false);
+                    if (sourceResult == null)
                     {
-                        if (!string.IsNullOrEmpty(keyValue.Key))
-                        {
-                            Log.Logger.Information("{@LogMessage}", $"GetClientData({keyValue.Key}) - Started");
-
-                            var entitiesWrapper = await _apiHelpeEntities.GetClientData(keyValue.Key).ConfigureAwait(false);
-
-                            var blobCollection = GetEntitiesBlob(entitiesWrapper);
-                            if (blobCollection.HasAny())
-                            {
-                                blobInfosDictionary.Add(keyValue.Key, blobCollection);                                
-                            }
-
-                            Log.Logger.Information("{@LogMessage}", $"GetClientData({keyValue.Key}) - Ended");
-
-                            var entities = (List<T2>) importClientHelper.GetPropertyValue(entitiesWrapper, "Entities");
-
-                            if (entitiesWrapper != null && entities != null && entities.Any())
-                            {
-                                if (entities.HasAny() && keyValue.Value != null)
-                                {
-                                    try
-                                    {
-                                        tasks.Add(keyValue.Value(entities, keyValue.Key));
-                                        await Task.WhenAll(tasks);
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Log.Logger.Error(e, e.ToString());
-                                    }
-                                }
-
-                                allEntities.AddRange(entities);
-                            }
-                        }
+                        continue;
                     }
-                }
 
-                if (_EntitiesApiUrls != null && _EntitiesApiUrls.Count > 0)
-                {
-                    foreach (var entitiesApiUrl in _EntitiesApiUrls)
+                    if (sourceResult.BlobCollection.HasAny())
                     {
-                        if (!string.IsNullOrEmpty(entitiesApiUrl))
-                        {
-                            Log.Logger.Information("{@LogMessage}", $"GetClientData({entitiesApiUrl}) - Started");
+                        var sourceId = sourceResult.SourceId ?? $"source-{Guid.NewGuid()}";
+                        blobInfosDictionary[sourceId] = sourceResult.BlobCollection;
+                    }
 
-                            var entitiesWrapper = await _apiHelpeEntities.GetClientData(entitiesApiUrl)
-                                .ConfigureAwait(false);
-
-                            var blobCollection = GetEntitiesBlob(entitiesWrapper);
-                            if (blobCollection.HasAny())
-                            {
-                                blobInfosDictionary.Add(entitiesApiUrl, blobCollection);                                
-                            }
-
-                            Log.Logger.Information("{@LogMessage}", $"GetClientData({entitiesApiUrl}) - Ended");
-
-                            if (entitiesWrapper != null)
-                            {
-                                var entities = (List<T2>) importClientHelper.GetPropertyValue(entitiesWrapper, "Entities");
-
-                                if (entities != null &&
-                                    entities.Any())
-                                {
-                                    allEntities.AddRange(entities);
-                                }
-                            }
-                        }
+                    if (sourceResult.Entities.HasAny())
+                    {
+                        allEntities.AddRange(sourceResult.Entities);
                     }
                 }
 
@@ -270,7 +131,12 @@ namespace Importers.ImportClient
                 blobInfosDictionary.Clear();
                 blobInfosDictionary = null;
 
-                Log.Logger.Information("{@LogMessage}", "GetEntitiesFromClientApi Ended.");
+                Log.Logger.Information("{@LogMessage}", "GetEntitiesFromSources Ended.");
+            }
+            catch (OperationCanceledException)
+            {
+                Log.Logger.Warning("{@LogMessage}", "GetEntitiesFromSources cancelled.");
+                throw;
             }
             catch (Exception e)
             {
@@ -279,25 +145,6 @@ namespace Importers.ImportClient
             }
 
             return allEntities;
-        }
-        
-        protected List<BlobInformation> GetEntitiesBlob(T1 apiWrapper)
-        {
-            var blobCollectionPropertyInfo =
-                apiWrapper.GetType().GetProperties().ToList()
-                    .FirstOrDefault(x =>
-                        x.Name.ToLower().Equals("BlobCollection".ToLower()));
-
-            if (blobCollectionPropertyInfo != null)
-            {
-                var blobCollection = blobCollectionPropertyInfo.GetValue(apiWrapper, null);
-                if (blobCollection is List<BlobInformation> blobDetailsCollectionValue)
-                {
-                    return blobDetailsCollectionValue;
-                }
-            }
-
-            return null;
         }
     }
 }

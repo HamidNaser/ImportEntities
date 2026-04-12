@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 using Importer.Core.Common;
 using Newtonsoft.Json;
 using Serilog;
@@ -18,31 +19,32 @@ namespace Importers.Integration.ApiHelper
             _movieApiOptions = movieApiOptions;
         }
 
-        protected override List<string> GetRawData(string endPoint)
+        protected override async Task<List<string>> GetRawDataAsync(string endPoint, CancellationToken ct = default)
         {
             var rawDataList = new List<string>();
-            
+
             try
             {
                 if (string.IsNullOrWhiteSpace(_movieApiOptions.ApiKey))
                 {
-                    throw new InvalidOperationException("Movies API key is missing. Configure ApiClients:Movies:ApiKey or TMDB_API_KEY before running the importer.");
+                    throw new InvalidOperationException(
+                        "Movies API key is missing. Configure ApiClients:Movies:ApiKey or TMDB_API_KEY before running the importer.");
                 }
 
-                var url = endPoint + $"?api_key={_movieApiOptions.ApiKey}&language={_movieApiOptions.Language}&page={_movieApiOptions.Page}";
+                var url = endPoint +
+                    $"?api_key={_movieApiOptions.ApiKey}&language={_movieApiOptions.Language}&page={_movieApiOptions.Page}";
 
-                using (WebClient wc = new HttpClientUtils.WebClientWithTimeout())
-                {
-                    wc.Proxy = null;
-                    var result = wc.DownloadString(url);
-                    rawDataList.Add(result);
-                }
-
+                var result = await _clientInfo.ClientHttp.GetStringAsync(url, ct).ConfigureAwait(false);
+                rawDataList.Add(result);
+            }
+            catch (OperationCanceledException)
+            {
+                Log.Logger.Warning("{@LogMessage}", $"GetRawDataAsync({endPoint}) cancelled.");
+                throw;
             }
             catch (Exception e)
             {
                 Log.Logger.Error("{@LogMessage}", e.GetaAllMessages());
-                return rawDataList;
             }
 
             return rawDataList;

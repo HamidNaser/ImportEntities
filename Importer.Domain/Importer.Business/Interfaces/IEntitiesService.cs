@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Importer.Business.Interfaces
 {
     public interface IEntitiesService<T>
     {
-        public Task ImportEntities(List<T> entities);
-        public HttpClient ClientHttp { set; get; }
-        public string ClientId { set; get; }
+        Task ImportEntities(List<T> entities, CancellationToken ct = default);
+        HttpClient ClientHttp { set; get; }
+        string ClientId { set; get; }
     }
 }

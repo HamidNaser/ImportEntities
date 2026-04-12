@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Importer.Business.Interfaces;
 using Importer.Core.Common;
@@ -33,7 +34,7 @@ namespace Importer.Business.Implementations
 
         protected List<Entity> Entities;
         
-        public virtual async Task ImportEntities(List<T> allApiEntities)
+        public virtual async Task ImportEntities(List<T> allApiEntities, CancellationToken ct = default)
         {
             
             
@@ -53,6 +54,8 @@ namespace Importer.Business.Implementations
 
             foreach (var apiEntity in allApiEntities)
             {
+                ct.ThrowIfCancellationRequested();
+
                 try
                 {
                     CurrentEntity = null;
@@ -71,6 +74,10 @@ namespace Importer.Business.Implementations
 
                     iCounter++;
                 }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
                 catch (Exception e)
                 {
                     Log.Logger.Error("{@LogMessage}", e.GetaAllMessages());
@@ -81,8 +88,12 @@ namespace Importer.Business.Implementations
             {
                 if (Entities.HasAny())
                 {
-                    await UpdateEntitiesInBatchesAsync().ConfigureAwait(false);
+                    await UpdateEntitiesInBatchesAsync(ct).ConfigureAwait(false);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception e)
             {
@@ -92,39 +103,39 @@ namespace Importer.Business.Implementations
             Log.Logger.Information("{@LogMessage}", "Importer.Business.ImportEntities Ended");            
         }
         
-        protected virtual async Task UpdateEntitiesInBatchesAsync()
+        protected virtual async Task UpdateEntitiesInBatchesAsync(CancellationToken ct = default)
         {
-            await Task.Run(async () =>
+            Log.Logger.Information("{@LogMessage}", "Importer.Business.UpdateEntitiesInBatchesAsync Started");
+
+            var totalCount = Entities.Count;
+            var batchSize = Entities.Count < 5 ? Entities.Count : 5;
+
+            for (int i = 0; i < totalCount; i += batchSize)
             {
-                Log.Logger.Information("{@LogMessage}", "Importer.Business.UpdateEntitiesInBatchesAsync Started");
+                ct.ThrowIfCancellationRequested();
 
-                var totalCount = Entities.Count;
+                var entitiesBatch = string.Empty;
+                var apiEntityBatch = Entities.Skip(i).Take(batchSize).ToList();
 
-                var batchSize = Entities.Count < 5 ? Entities.Count : 5;
-                
-                for (int i = 0; i < totalCount; i += batchSize)
+                try
                 {
-                    var entitiesBatch = string.Empty;
+                    entitiesBatch = JsonConvert.SerializeObject(apiEntityBatch);
 
-                    var apiEntityBatch = Entities.Skip(i).Take(batchSize).ToList();
+                    await _EntitiesRepository.UpdateEntities(entitiesBatch, ct).ConfigureAwait(false);
 
-                    try
-                    {
-                        
-                        entitiesBatch = JsonConvert.SerializeObject(apiEntityBatch);
-
-                        await _EntitiesRepository.UpdateEntities(entitiesBatch).ConfigureAwait(false);
-
-                        Log.Logger.Information("{@LogMessage}", $"Update Entities Table # {i} of {totalCount}");
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Logger.Error($"Error {e}, Entities Batch: {entitiesBatch} failed", e.ToString(), entitiesBatch);
-                    }
+                    Log.Logger.Information("{@LogMessage}", $"Update Entities Table # {i} of {totalCount}");
                 }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    Log.Logger.Error($"Error {e}, Entities Batch: {entitiesBatch} failed", e.ToString(), entitiesBatch);
+                }
+            }
 
-                Log.Logger.Information("{@LogMessage}", "Importer.Business.UpdateentitiesBatchInBatchesAsync Ended");
-            });
+            Log.Logger.Information("{@LogMessage}", "Importer.Business.UpdateEntitiesInBatchesAsync Ended");
         }
 
         

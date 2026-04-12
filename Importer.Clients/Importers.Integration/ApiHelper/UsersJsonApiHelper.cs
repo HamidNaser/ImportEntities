@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 using Importer.Core.Common;
 using Newtonsoft.Json;
 using Serilog;
@@ -12,27 +13,26 @@ namespace Importers.Integration.ApiHelper
     {
         public UsersJsonApiHelper(IClientInfo clientInfo) : base(clientInfo)
         {
-            _clientInfo = clientInfo;           
+            _clientInfo = clientInfo;
         }
 
-        protected override List<string> GetRawData(string endPoint)
+        protected override async Task<List<string>> GetRawDataAsync(string endPoint, CancellationToken ct = default)
         {
             var rawDataList = new List<string>();
-            
+
             try
             {
-                using (WebClient wc = new HttpClientUtils.WebClientWithTimeout())
-                {
-                    wc.Proxy = null;
-                    var result = wc.DownloadString(endPoint);
-                    rawDataList.Add(result);
-                }
-
+                var result = await _clientInfo.ClientHttp.GetStringAsync(endPoint, ct).ConfigureAwait(false);
+                rawDataList.Add(result);
+            }
+            catch (OperationCanceledException)
+            {
+                Log.Logger.Warning("{@LogMessage}", $"GetRawDataAsync({endPoint}) cancelled.");
+                throw;
             }
             catch (Exception e)
             {
                 Log.Logger.Error("{@LogMessage}", e.GetaAllMessages());
-                return rawDataList;
             }
 
             return rawDataList;
